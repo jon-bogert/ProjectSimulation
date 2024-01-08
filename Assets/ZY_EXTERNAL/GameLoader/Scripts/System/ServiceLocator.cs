@@ -9,7 +9,6 @@ public static class ServiceLocator
     {
         if (!_systemRegistry.ContainsKey(typeof(T)))
         {
-            Debug.Log(system + " registered!");
             _systemRegistry.Add(typeof(T), system);
             return;
         }
