@@ -24,7 +24,11 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("References")]
     [SerializeField] Transform _camera;
-    [SerializeField] Transform _leftController;
+    [SerializeField] PlayerHand _leftHand;
+    [SerializeField] PlayerHand _rightHand;
+
+    ClimbController _leftClimb;
+    ClimbController _rightClimb;
 
 
     private CharacterController _charController;
@@ -42,6 +46,10 @@ public class PlayerMovement : MonoBehaviour
     internal float frictionAir { get { return _frictionAir; } }
     internal StateMachine<PlayerMovement> stateMachine { get {  return _stateMachine; } }
     internal bool jumpThisFrame {  get { return _jumpThisFrame; }  set { _jumpThisFrame = value; } } 
+    internal PlayerHand leftHand { get { return _leftHand; } }
+    internal PlayerHand rightHand { get { return _rightHand; } }
+    internal ClimbController leftClimb { get { return _leftClimb; } }
+    internal ClimbController rightClimb { get { return _rightClimb; } }
 
     private void Awake()
     {
@@ -51,7 +59,16 @@ public class PlayerMovement : MonoBehaviour
         _stateMachine = new StateMachine<PlayerMovement>(this);
         _stateMachine.AddState<PlayerGrounded>();
         _stateMachine.AddState<PlayerAirborn>();
+        _stateMachine.AddState<PlayerClimbing>();
         _stateMachine.ChangeState((int)PlayerStates.Grounded);
+
+        GameLoader.CallOnComplete(Init);
+    }
+
+    private void Init()
+    {
+        _leftClimb = _leftHand.GetComponent<ClimbController>();
+        _rightClimb = _rightHand.GetComponent<ClimbController>();
     }
 
     private void Update()
@@ -59,6 +76,7 @@ public class PlayerMovement : MonoBehaviour
         _moveAxis = _moveInput.action.ReadValue<Vector2>();
         ColliderUpdate();
         _stateMachine.Update(Time.deltaTime);
+        VRDebug.Monitor(1, ((PlayerStates)_stateMachine.currentState).ToString());
 
         _charController.Move(_velocity * Time.deltaTime);
     }
@@ -78,13 +96,13 @@ public class PlayerMovement : MonoBehaviour
         //Adjust for Facing Direction
         Vector3 forward = (_useDisplayRelative) ?
             _camera.forward :
-            _leftController.forward;
+            _leftHand.transform.forward;
         forward.y = 0f;
         forward.Normalize();
 
         Vector3 right = (_useDisplayRelative) ?
             _camera.right :
-            _leftController.right;
+            _leftHand.transform.right;
         right.y = 0f;
         right.Normalize();
 
@@ -128,6 +146,17 @@ public class PlayerMovement : MonoBehaviour
     internal void ResetYVelocity()
     {
         _velocity.y = 0f;
+    }
+
+    internal void SetVelocity(Vector3 velocity)
+    {
+        _velocity = velocity;
+    }
+
+    internal void AbsoluteMove(Vector3 amt)
+    {
+        _velocity = Vector3.zero;
+        _charController.Move(amt);
     }
 
     internal void DoJump()

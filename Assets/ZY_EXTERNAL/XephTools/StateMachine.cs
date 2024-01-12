@@ -12,8 +12,10 @@ namespace XephTools
     public class StateMachine<AgentType> where AgentType : class
     {
         protected AgentType _agent;
-        protected IState<AgentType> _currentState = null;
+        protected int _currentState = -1;
         protected List<IState<AgentType>> _states;
+
+        public int currentState { get { return _currentState; } }
 
         public StateMachine(AgentType agent)
         {
@@ -28,19 +30,19 @@ namespace XephTools
 
         public void Update(float deltaTime)
         {
-            if (_currentState == null)
+            if (_currentState < 0)
                 return;
 
-            _currentState.Update(_agent, deltaTime);
+            _states[_currentState].Update(_agent, deltaTime);
         }
 
         public void ChangeState(int index)
         {
-            if (_currentState != null)
-                _currentState.Exit(_agent);
+            if (_currentState >= 0)
+                _states[_currentState].Exit(_agent);
 
-            _currentState = _states[index];
-            _currentState.Enter(_agent);
+            _currentState = index;
+            _states[_currentState].Enter(_agent);
         }
     }
 }
