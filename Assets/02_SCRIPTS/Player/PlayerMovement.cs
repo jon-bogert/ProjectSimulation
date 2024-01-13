@@ -13,7 +13,9 @@ public class PlayerMovement : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] float _frictionAir = 0.2f;
     [SerializeField] float _gravityAmount = -9.8f;
+    [SerializeField] float _groundForce = 0.1f;
     [SerializeField] float _jumpVelocity = 5f;
+    [SerializeField] float _slopeDetectionDistance = 0.2f;
 
     [Header("Settings")]
     [SerializeField] bool _useDisplayRelative = true;
@@ -78,6 +80,7 @@ public class PlayerMovement : MonoBehaviour
         _stateMachine.Update(Time.deltaTime);
         VRDebug.Monitor(1, ((PlayerStates)_stateMachine.currentState).ToString());
 
+        ApplySlope();
         _charController.Move(_velocity * Time.deltaTime);
     }
 
@@ -108,8 +111,10 @@ public class PlayerMovement : MonoBehaviour
 
         velocity = right * velocity.x + forward * velocity.z;
 
+        velocity.y += _velocity.y;
+
         //Apply
-        _velocity = new Vector3(velocity.x, _velocity.y, velocity.z);
+        _velocity = velocity;
     }
 
     internal void Deccelerate(float friction)
@@ -141,6 +146,29 @@ public class PlayerMovement : MonoBehaviour
     internal void ApplyGravity()
     {
         _velocity.y += _gravityAmount * Time.deltaTime;
+    }
+
+    internal void ApplyGroundForce()
+    {
+        if (_velocity.y <= 0f)
+            _velocity.y = -_groundForce;
+    }
+
+    private void ApplySlope()
+    {
+        Vector3 v = new Vector3(_velocity.x, 0f, _velocity.z);
+        Ray ray = new Ray(transform.position, Vector3.down);
+        if (Physics.Raycast(ray, out RaycastHit info, _slopeDetectionDistance))
+        {
+            Quaternion slopeRot = Quaternion.FromToRotation(Vector3.up, info.normal);
+            v = slopeRot * v;
+
+            if (v.y >= 0f)
+                return;
+
+            v.y += _velocity.y;
+            _velocity = v;
+        }
     }
 
     internal void ResetYVelocity()

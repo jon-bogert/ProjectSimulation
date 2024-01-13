@@ -20,6 +20,8 @@ public class PlayerGrounded : IState<PlayerMovement>
             agent.Deccelerate(agent.frictionGround);
         }
 
+        agent.ApplyGroundForce();
+
         if (agent.jumpThisFrame)
         {
             agent.jumpThisFrame = false;

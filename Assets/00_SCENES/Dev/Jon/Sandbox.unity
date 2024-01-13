@@ -4359,7 +4359,9 @@ MonoBehaviour:
   _frictionGround: 0.187
   _frictionAir: 0.2
   _gravityAmount: -9.8
+  _groundForce: 0.1
   _jumpVelocity: 5
+  _slopeDetectionDistance: 1
   _useDisplayRelative: 1
   _moveInput: {fileID: -9079129532740812180, guid: 62df35bc5d43880469dc57bfafc60c18,
     type: 3}
