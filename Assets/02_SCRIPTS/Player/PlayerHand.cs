@@ -31,13 +31,13 @@ public class PlayerHand : MonoBehaviour
 
     private void Init()
     {
-        _prevPos = _currPos = transform.position;
+        _prevPos = _currPos = transform.localPosition;
     }
 
     private void Update()
     {
         _prevPos = _currPos;
-        _currPos = transform.position;
+        _currPos = transform.localPosition;
         _moveDelta = _currPos - _prevPos;
     }
 
