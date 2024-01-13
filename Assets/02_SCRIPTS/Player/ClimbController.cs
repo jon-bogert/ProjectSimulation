@@ -8,6 +8,7 @@ public class ClimbController : MonoBehaviour
 
     [Header("References")]
     [SerializeField] PlayerMovement _playerMovement;
+    [SerializeField] TrackedVisual _handVisual;
 
     public bool isClimbing { get { return _isClimbing; } }
     public Vector3 moveDelta { get { return _hand.moveDelta; } }
@@ -23,6 +24,8 @@ public class ClimbController : MonoBehaviour
     {
         _hand.grabbed += OnGrab;
         _hand.released += OnRelease;
+        _handVisual.triggerEntered += _OnTriggerEnter;
+        _handVisual.triggerExited += _OnTriggerExit;
     }
 
     private void OnDestroy()
@@ -32,9 +35,14 @@ public class ClimbController : MonoBehaviour
             _hand.grabbed -= OnGrab;
             _hand.released -= OnRelease;
         }
+        if (_handVisual != null)
+        {
+            _handVisual.triggerEntered -= _OnTriggerEnter;
+            _handVisual.triggerExited -= _OnTriggerExit;
+        }
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void _OnTriggerEnter(Collider other)
     {
         Climbable tmp = other.gameObject.GetComponent<Climbable>();
         if (tmp is null)
@@ -49,7 +57,7 @@ public class ClimbController : MonoBehaviour
         _climbable = tmp;
     }
 
-    private void OnTriggerExit(Collider other)
+    private void _OnTriggerExit(Collider other)
     {
         Climbable tmp = other.gameObject.GetComponent<Climbable>();
         if (tmp is null)
@@ -83,12 +91,13 @@ public class ClimbController : MonoBehaviour
 
     private void BeginClimb()
     {
-        Debug.Log("Begin Climb A");
+        Transform gripPoint = _climbable.GetClosestGrip(transform.position);
+        _handVisual.SetDestination(gripPoint);
+
         if (_playerMovement.stateMachine.currentState == (int)PlayerStates.Climbing)
             return;
-        Debug.Log("Begin Climb B");
+        
         _playerMovement.stateMachine.ChangeState((int)PlayerStates.Climbing);
-        //Snap the position of hand to closest grip point
     }
 
     public void EndClimb()
@@ -97,6 +106,7 @@ public class ClimbController : MonoBehaviour
         Vector3 velocity = -_hand.moveDelta / Time.deltaTime;
         _playerMovement.SetVelocity(velocity);
         _playerMovement.stateMachine.ChangeState((int)PlayerStates.Airborn);
+        _handVisual.ResetDestination();
     }
 
 }
