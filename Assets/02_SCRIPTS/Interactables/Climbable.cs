@@ -9,6 +9,18 @@ public class Climbable : MonoBehaviour
     [SerializeField] Transform _topPoint = null;
 
     public bool isTop { get { return _topPoint != null; } }
+    public Vector3 topPosition
+    {
+        get
+        {
+            if (_topPoint is null)
+            {
+                Debug.LogError("Top Point was null");
+                return Vector3.zero;
+            }
+            return _topPoint.position;
+        }
+    }
 
     public Transform GetClosestGrip(Vector3 position)
     {
@@ -30,5 +42,15 @@ public class Climbable : MonoBehaviour
             }
         }
         return closest;
+    }
+
+    private void OnDrawGizmos()
+    {
+
+        if (_topPoint != null)
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawCube(_topPoint.position, new Vector3(0.25f, 0, 0.25f));
+        }
     }
 }

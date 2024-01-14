@@ -1,10 +1,19 @@
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit.AffordanceSystem.Receiver.Transformation;
+using XephTools;
 
 public class ClimbController : MonoBehaviour
 {
     PlayerHand _hand = null;
     Climbable _climbable = null;
     bool _isClimbing = false;
+
+    [Header("Parameters")]
+    [Range(0, 1)]
+    [SerializeField] float _topDetectionThreshold = 0.5f;
+    [SerializeField] float _topVelocityOverride = 3f;
+    [Range(0, 1)]
+    [SerializeField] float _displacementSmoothing = 0.6f;
 
     [Header("References")]
     [SerializeField] PlayerMovement _playerMovement;
@@ -24,8 +33,10 @@ public class ClimbController : MonoBehaviour
     {
         _hand.grabbed += OnGrab;
         _hand.released += OnRelease;
+        _handVisual.distanceReseted += OnRelease;
         _handVisual.triggerEntered += _OnTriggerEnter;
         _handVisual.triggerExited += _OnTriggerExit;
+        _handVisual.displacementAdjust += AdjustVisualOffset;
     }
 
     private void OnDestroy()
@@ -37,8 +48,10 @@ public class ClimbController : MonoBehaviour
         }
         if (_handVisual != null)
         {
+            _handVisual.distanceReseted -= OnRelease;
             _handVisual.triggerEntered -= _OnTriggerEnter;
             _handVisual.triggerExited -= _OnTriggerExit;
+            _handVisual.displacementAdjust -= AdjustVisualOffset;
         }
     }
 
@@ -72,7 +85,7 @@ public class ClimbController : MonoBehaviour
         _climbable = null;
     }
 
-    private void OnGrab(Transform handTransform)
+    private void OnGrab()
     {
         if (_climbable is null)
             return;
@@ -81,12 +94,13 @@ public class ClimbController : MonoBehaviour
         BeginClimb();
     }
 
-    private void OnRelease(Transform handTransform)
+    private void OnRelease()
     {
         if (!_isClimbing)
             return;
 
         _isClimbing = false;
+        _handVisual.ResetDestination();
     }
 
     private void BeginClimb()
@@ -102,11 +116,42 @@ public class ClimbController : MonoBehaviour
 
     public void EndClimb()
     {
-        //check hand y-state
         Vector3 velocity = -_hand.moveDelta / Time.deltaTime;
+        if (velocity.sqrMagnitude < (_topVelocityOverride * _topVelocityOverride))
+        {
+            //check hand y-state
+            if (_climbable.isTop)
+            {
+                if (TopCheck())
+                {
+                    _playerMovement.stateMachine.ChangeState((int)PlayerStates.Grounded);
+                    return;
+                }
+            }
+        }
+
         _playerMovement.SetVelocity(velocity);
         _playerMovement.stateMachine.ChangeState((int)PlayerStates.Airborn);
-        _handVisual.ResetDestination();
     }
 
+    private bool TopCheck()
+    {
+        float handPercent = (_playerMovement.localHeadPosition.y - transform.localPosition.y) / _playerMovement.localHeadPosition.y;
+        if (handPercent >= 0.5f)
+        {
+            Vector3 teleportPoint = _climbable.topPosition;
+            _playerMovement.Teleport(teleportPoint);
+            return true;
+        }
+        return false;
+    }
+
+    private void AdjustVisualOffset(Vector3 visualPosition, Vector3 handPosition)
+    {
+        if (!isClimbing)
+            return;
+
+        Vector3 offset = visualPosition - handPosition;
+        _playerMovement.AbsoluteMove(offset * _displacementSmoothing);
+    }
 }

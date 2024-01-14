@@ -52,6 +52,7 @@ public class PlayerMovement : MonoBehaviour
     internal PlayerHand rightHand { get { return _rightHand; } }
     internal ClimbController leftClimb { get { return _leftClimb; } }
     internal ClimbController rightClimb { get { return _rightClimb; } }
+    internal Vector3 localHeadPosition { get { return _camera.transform.localPosition; } }
 
     private void Awake()
     {
@@ -185,6 +186,14 @@ public class PlayerMovement : MonoBehaviour
     {
         _velocity = Vector3.zero;
         _charController.Move(amt);
+    }
+    
+    internal void Teleport(Vector3 position)
+    {
+        ResetYVelocity();
+        Vector3 playerPosition = new Vector3(_camera.transform.position.x, transform.position.y, _camera.transform.position.z);
+        Vector3 moveDelta = position - playerPosition;
+        _charController.Move(moveDelta);
     }
 
     internal void DoJump()

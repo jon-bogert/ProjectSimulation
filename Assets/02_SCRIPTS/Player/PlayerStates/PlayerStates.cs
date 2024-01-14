@@ -63,17 +63,27 @@ public class PlayerAirborn : IState<PlayerMovement>
 public class PlayerClimbing : IState<PlayerMovement>
 {
     private bool lastHandLeft = true;
+    Vector3 expectedPosition = Vector3.zero;
+    Vector3 moveDeficite = Vector3.zero;
+
+    public void Enter(PlayerMovement agent)
+    {
+        expectedPosition = agent.transform.position;
+        moveDeficite = Vector3.zero;
+    }
+
     public void Update(PlayerMovement agent, float deltaTime)
     {
         bool isLeftClimbing = agent.leftClimb.isClimbing;
         bool isRightClimbing = agent.rightClimb.isClimbing;
         Vector3 moveAmount = Vector3.zero;
+        moveDeficite +=  agent.transform.position - expectedPosition;
 
         ClimbController activeHand = null;
         // Check which hands are climbing
         if (isLeftClimbing && isRightClimbing)
         {
-            moveAmount = agent.leftClimb.moveDelta + agent.rightClimb.moveDelta / 2f;
+            moveAmount = (agent.leftClimb.moveDelta / 2f) + (agent.rightClimb.moveDelta / 2f);
             moveAmount *= -1f;
         }
         else if (isLeftClimbing)
@@ -95,7 +105,5 @@ public class PlayerClimbing : IState<PlayerMovement>
         }
 
         agent.AbsoluteMove(moveAmount);
-
-        // TODO Update hand position to grip point?
     }
 }

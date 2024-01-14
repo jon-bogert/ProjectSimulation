@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerHand : MonoBehaviour
 {
-    public delegate void GrabEvent(Transform transf);
+    public delegate void GrabEvent();
 
     public enum Hand { Dominant, NonDominant };
     [Header("Parameters")]
@@ -51,9 +51,9 @@ public class PlayerHand : MonoBehaviour
     {
         if (ctx.action.IsPressed())
         {
-            grabbed?.Invoke(transform);
+            grabbed?.Invoke();
             return;
         }
-        released?.Invoke(transform);
+        released?.Invoke();
     }
 }
