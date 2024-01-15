@@ -3,14 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using XephTools;
 
 public class GameLoader : AsyncLoader
 {
     [SerializeField] private int sceneIndexToLoad = 1;
     [Space]
     [SerializeField] private List<Component> GameModules = new List<Component>();
-    //[Header("Prefabs")]
-    //[SerializeField] private GameObject saveManagerPrefab;
+    [Header("Prefabs")]
+    [SerializeField] private GameObject saveManagerPrefab;
     private static GameLoader _instance = null;
     private static int _sceneIndex = 1;
     private static bool _isDontDestroyLoaded = false;
@@ -78,10 +79,10 @@ public class GameLoader : AsyncLoader
         //var dummySys = dummyGO.AddComponent<DummyMonoSystem>();
         //ServiceLocator.Register<IDummyMonoSystem>(dummySys);
 
-        //Register<GameManager>("GameManager");
+        Register<GlobalRefs>("Globals");
 
         //Prefabs
-        //RegisterPrefab<SaveManager>(saveManagerPrefab);
+        RegisterPrefab<SaveManager>(saveManagerPrefab);
 
         yield return null;
     }

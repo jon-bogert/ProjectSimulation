@@ -43,7 +43,7 @@ public static class ServiceLocator
         _systemRegistry.TryGetValue(typeof(T), out ret);
         if (ret == null)
         {
-            Debug.Log("Could not find [" + (typeof(T)) + "] as a registered system");
+            Debug.LogError("Could not find [" + (typeof(T)) + "] as a registered system");
         }
         return (T)ret;
     }
