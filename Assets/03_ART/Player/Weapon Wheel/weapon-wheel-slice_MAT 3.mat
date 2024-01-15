@@ -39,6 +39,7 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
+    - _DeselectedOpacity: 0.01
     - _Selected: 0
     - _SelectedOpacity: 0.05
     m_Colors: []

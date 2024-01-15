@@ -22,4 +22,11 @@ public class SelectionWheelShader : MonoBehaviour
     {
         _material.SetInt("_Selected", 0);
     }
+
+    private void OnDisable()
+    {
+        
+        if (_material != null)
+            _material.SetInt("_Selected", 0);
+    }
 }
