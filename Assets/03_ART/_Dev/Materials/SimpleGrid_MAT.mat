@@ -51,11 +51,15 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AA_Amount: 1
+    - _Fade_Distance: 0
+    - _Falloff: 5
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Smoothness: 0.01
-    - _Thickness: 0
-    - _TilingAmount: 1000
+    - _Thickness: 0.01
+    - _TilingAmount: 500
     m_Colors:
     - _Color: {r: 4, g: 4, b: 4, a: 0}
+    - _Fade: {r: 0, g: 50, b: 0, a: 0}
   m_BuildTextureStacks: []
