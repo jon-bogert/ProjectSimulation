@@ -40,6 +40,8 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 _velocity = Vector3.zero;
     bool _jumpThisFrame = false;
 
+    bool _movementOverride = false;
+
     //
     internal Vector2 moveAxis { get { return _moveAxis; } }
     internal float moveSpeedGround { get { return _moveSpeedGround; } }
@@ -53,6 +55,8 @@ public class PlayerMovement : MonoBehaviour
     internal ClimbController leftClimb { get { return _leftClimb; } }
     internal ClimbController rightClimb { get { return _rightClimb; } }
     internal Vector3 localHeadPosition { get { return _camera.transform.localPosition; } }
+
+    internal bool movementOverride { get { return _movementOverride; } set { _movementOverride = value; } }
 
     private void Awake()
     {
@@ -76,6 +80,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        if (_movementOverride)
+            return;
+
         _moveAxis = _moveInput.action.ReadValue<Vector2>();
         ColliderUpdate();
         _stateMachine.Update(Time.deltaTime);
